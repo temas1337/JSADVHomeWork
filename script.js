@@ -1,71 +1,95 @@
-class card {
-    addGoods () {
+const API = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses';
+
+// let getRequest = (url, cb) => {
+//     let xhr = new XMLHttpRequest();
+//     // window.ActiveXObject -> xhr = new ActiveXObject()
+//     xhr.open("GET", url, true);
+//     xhr.onreadystatechange = () => {
+//         if(xhr.readyState === 4){
+//             if(xhr.status !== 200){
+//                 console.log('Error');
+//             } else {
+//                 cb(xhr.responseText);
+//             }
+//         }
+//     };
+//     xhr.send();
+// };
+
+class ProductsList {
+    constructor(container = '.products'){
+        this.container = container;
+        this.goods = [];//массив товаров из JSON документа
+        this._getProducts()
+            .then(data => { //data - объект js
+                 this.goods = data;
+//                 console.log(data);
+                 this.render()
+            });
     }
-    totalCost() {
+    // _fetchProducts(cb){
+    //     getRequest(`${API}/catalogData.json`, (data) => {
+    //         this.goods = JSON.parse(data);
+    //         console.log(this.goods);
+    //         cb();
+    //     })
+    // }
+    _getProducts(){
+      
+        return fetch(`${API}/catalogData.json`)
+            .then(result => result.json())
+            .catch(error => {
+                console.log(error);
+            });
+       
+    }
+    calcSum(){
+        return this.allProducts.reduce((accum, item) => accum += item.price, 0);
+    }
+    render(){
+        const block = document.querySelector(this.container);
+        for (let product of this.goods){
+            const productObj = new ProductItem(product);
+//            this.allProducts.push(productObj);
+            block.insertAdjacentHTML('beforeend', productObj.render());
+        }
 
     }
-    payment() {
-
-    }
-
-    deletethink() {
-
-    }
-};
-
-class cardThink{
-
 }
-class GoodsItem {
-    constructor(title, price) {
-    this.title = title;
-    this.price = price;
- }
-   render() {
-    return `<div class="goods-item">
-    <img class="img_card" src="tshirt-2.jpg">
-    <h3 class="card_title">${this.title}</h3>
-    <p class="card_price">${this.price}</p>
-    <button class="cart-button" type="button">Купить</button></div> `;
-};
+
+
+class ProductItem {
+    constructor(product, img = 'https://via.placeholder.com/200x150'){
+        this.title = product.product_name;
+        this.price = product.price;
+        this.id = product.id_product;
+        this.img = img;
+    }
+    render(){
+        return `<div class="product-item" data-id="${this.id}">
+                <img src="${this.img}" alt="Some img">
+                <div class="desc">
+                    <h3>${this.title}</h3>
+                    <p>${this.price} $</p>
+                    <button class="buy-btn">Купить</button>
+                </div>
+            </div>`
+    }
+}
+
+
+function openCart(){
+    const cartBlock = document.querySelector('.cart');
+    const cart = document.querySelector('.btn-cart');
+    cart.addEventListener('click', function(){
+        cartBlock.classList.toggle('displayBlock')
+        
+    } )
+
     
-}
-
-class goodsList {
-    constructor() {
-        this.goods = [];
-    }
-    fetchGoods() {
-        this.goods = [
-            { title: 'Shirt', price: 150 },
-            { title: 'Socks', price: 50 },
-            { title: 'Jacket', price: 350 },
-            { title: 'Shoes', price: 250 },
-            ];
-    }
-    render() {
-        let listHTML = '';
-        this.goods.forEach(good => {
-            const goodItem = new GoodsItem(good.title, good.price);
-            listHTML += goodItem.render();
-        });
-        document.querySelector('.goods-list').innerHTML = listHTML;
-    }
-
-    sum (){
-        let sumGoods = 0;
-        this.goods.forEach(good=> {
-            sumGoods += good.price;
-
-        });
-        console.log(sumGoods);
-    }
-}
-
-const list = new goodsList();
-list.fetchGoods();
-list.render();
-list.sum()
+} 
 
 
-
+openCart();
+let list = new ProductsList();
+console.log(list.allProducts);
